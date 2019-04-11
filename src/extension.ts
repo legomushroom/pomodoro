@@ -1,73 +1,107 @@
 import * as vscode from "vscode";
+import * as path from 'path';
+import { spawn } from 'child_process';
+// import { exec, ChildProcess } from 'child_process';
+// import * as vsls from "vsls";
 
-import { registerLiveShareSessionProvider } from "./tree-provider";
+// const SERVICE_NAME = 'vsls-emoji';
 
-import { COMMAND_IDS, State } from "./constants";
-import { createStore, combineReducers, Action } from 'redux';
-import { startAction, resetAction, TICK, stopAction, COMPLETE_CURRENT_SEGMENT_ACTION, RESET_SEGMENTS_ACTION } from "./actions/actions";
-import { stateReducer } from "./reducers/stateReducer";
-import { configReducer, remainingTimeReducer, completedSegmentsReducer } from "./reducers";
-import { Clock } from "./clock";
-import { shareState, vslsStoreEnhancer} from 'vsls-redux';
-import { IAppState } from "./IAppState";
+// const emojiesMap = {
+//   'neutral': '😐',
+//   'happy': '😊',
+//   'sad': '😥',
+//   'angry': '😠',
+//   'fearful': '😨',
+//   'disgusted': '🤢',
+//   'surprised': '😮'
+// };
 
-const setExtensionContext = async (state: State) => {
-  await vscode.commands.executeCommand(
-    "setContext",
-    "liveshare.pomodoro.state",
-    state
-  );
+// const EMOJI_CHANGED_EVENT = 'emoji-changed';
+
+// let child: ChildProcess;
+
+const showScreenPicker = async () => {
+  let command = 'electron';
+  let cwd = path.join(__dirname, '../screen-viewer-electron/');
+
+  const spawnEnv = JSON.parse(JSON.stringify(process.env));
+
+  // remove those env consts
+  delete spawnEnv.ATOM_SHELL_INTERNAL_RUN_AS_NODE;
+  delete spawnEnv.ELECTRON_RUN_AS_NODE;
+
+  const sp = spawn(command, ['.'], { env: spawnEnv, cwd });
+
+  sp.stdout.on('data', async (...data: any[]) => {
+    console.log('data');
+  });
+  sp.stderr.on('data', (data: any[]) => {
+      console.log(`stderr data: `, data[0].toString());
+  });
+  sp.on('close', (code) => {
+      console.log(`child process exited with code`, code);
+  });
+  sp.on('error', (err) => {
+      console.log(`error `, err);
+  });
 };
 
-const reducer = combineReducers({
-  completedSegments: completedSegmentsReducer,
-  remainingTime: remainingTimeReducer,
-  config: configReducer,
-  state: stateReducer,
-});
-
-function actionFilter(action: Action): boolean {
-  return [TICK, COMPLETE_CURRENT_SEGMENT_ACTION, RESET_SEGMENTS_ACTION].indexOf(action.type) === -1;
-}
-
 export async function activate(context: vscode.ExtensionContext) {
-  const store = createStore(shareState(reducer), undefined, vslsStoreEnhancer(actionFilter) as any);
+  await showScreenPicker();
 
-  new Clock(store);
 
-  registerLiveShareSessionProvider(store);
 
-  store.subscribe(async () => {
-    const { state } = store.getState();
-    await setExtensionContext(state.isPaused ? State.stopped : State.running)    
-  });
 
-  setExtensionContext(State.stopped);
+
+
+  // const vslsApi = (await vsls.getApi())!;
+
+  // vslsApi!.onDidChangeSession(async (e) => {
+  //   // If there isn't a session ID, then that
+  //   // means the session has been ended.
+  //   if (!e.session.id) {
+  //     child.kill();
+  //     return;
+  //   }
+
+  //   let service;
+  //   if (e.session.role === vsls.Role.Host) {
+  //     service = await vslsApi.shareService(SERVICE_NAME);
+  //   } else {
+  //     service = await vslsApi.getSharedService(SERVICE_NAME);
+  //   }
+
+  //   service.onNotify(EMOJI_CHANGED_EVENT, (args: any) => {
+  //     const { sessionId, emoji } = args;
   
-  const startCommand = vscode.commands.registerCommand(
-    COMMAND_IDS.start,
-    async () => {
-      const { config } = store.getState() as IAppState;
-      store.dispatch(startAction(config.intervalDuration));
-    }
-  );
+  //     vslsApi.setUserSessionEmoji(`${sessionId}`, emoji);
+  //   });
+  
+  //   child = exec('node ./test.js', { cwd: __dirname, env: process.env }, (...args: any[]) => {});
+  
+  //   child.stdout.on('data', (data: string) => {
+  //     try {
+  //       const prediction = JSON.parse(data);
+  //       if (prediction && (prediction.probability != null)) {
+  //         const emoji = emojiesMap[prediction.expression] + ' ';
+  //         const sessionId = vslsApi.session.peerNumber;
+  
+  //         service.notify(EMOJI_CHANGED_EVENT, {
+  //           sessionId,
+  //           emoji
+  //         });
+  
+  //         console.log(vslsApi.session.peerNumber, emoji, prediction);
+  //       } else {
+  //         console.log(`failed to parse prediction.`);
+  //       }
+  //     } catch (e) {
+  //       // ignore
+  //     }
+  //   });
 
-  const stopCommand = vscode.commands.registerCommand(
-    COMMAND_IDS.stop,
-    async () => {
-      const { config } = <IAppState>store.getState();
-      store.dispatch(stopAction(config.intervalDuration));
-    }
-  );
 
-  const resetCommand = vscode.commands.registerCommand(
-    COMMAND_IDS.reset,
-    async () => {
-      store.dispatch(resetAction());
-    }
-  );
-
-  context.subscriptions.push(startCommand, stopCommand, resetCommand);
+  // });
 }
 
 export function deactivate() {}

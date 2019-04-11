@@ -1,5 +1,5 @@
 {
-  "name": "vsls-pomodoro",
+  "name": "vsls-emoji",
   "displayName": "Live Share Pomodoro",
   "publisher": "lostintangent",
   "description": "Adds a collaborative pomodoro timer to Visual Studio Live Share sessions",
@@ -26,6 +26,7 @@
     "productivity"
   ],
   "activationEvents": [
+    "*",
     "onFileSystem:vsls",
     "onCommand:liveshare.start",
     "onCommand:liveshare.startFromActivityBar",
@@ -200,9 +201,13 @@
     "tslint": "^5.8.0",
     "typescript": "^3.1.4",
     "vscode": "^1.1.25",
-    "vsls": "^0.3.967"
+    "vsls": "^0.3.1291"
   },
   "dependencies": {
+    "@tensorflow/tfjs-node": "^1.0.3",
+    "canvas": "^2.4.1",
+    "face-api.js": "^0.19.0",
+    "node-webcam": "^0.4.6",
     "redux": "^4.0.1",
     "vsls-redux": "^1.0.3"
   },

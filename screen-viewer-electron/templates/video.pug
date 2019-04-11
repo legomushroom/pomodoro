@@ -1,0 +1,31 @@
+doctype html
+html(lang="en")
+  head
+    title Video
+    script(src="http://cdn.peerjs.com/0.3/peer.js")
+  body
+    <video autoplay id="js-video" style="display: inline-block; width: 100%; max-width: 100%;" />
+    script
+        | var video = document.querySelector('#js-video');
+        | var peer2 = new Peer('electron-app2', {host: 'localhost', port: 9000, path: 'peerjs' });
+        |
+        | var conn = peer2.connect('electron-app1');
+        | conn.on('open', function(){
+        |   console.log('send');
+        |   conn.send('hi!');
+        | });
+        |
+        | console.log('init');
+        | peer2.on('call', function(call) {
+        |   console.log('on call', call);
+        |   call.answer(window.localStream);
+        |   call.on('stream', function(remoteStream) {
+        |       console.log('stream!');
+        |       console.log(remoteStream);
+        |       video.src = URL.createObjectURL(remoteStream);
+        |   });
+        | call.on('close', function() {
+        |   console.log('closed');
+        | });
+        | });
+
