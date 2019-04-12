@@ -1,8 +1,8 @@
 {
   "name": "vsls-emoji",
   "displayName": "Live Share Emoji",
-  "publisher": "lostintangent",
-  "description": "Adds a emoji expressions",
+  "publisher": "ms-vsliveshare",
+  "description": "Adds emoji expressions",
   "version": "0.1.0",
   "preview": true,
   "icon": "images/logo.png",
@@ -55,13 +55,13 @@
     "@types/node": "^8.10.25",
     "tslint": "^5.8.0",
     "typescript": "^3.1.4",
-    "vscode": "^1.1.25",
-    "vsls": "^0.3.1291"
+    "vscode": "^1.1.25"
   },
   "dependencies": {
     "@tensorflow/tfjs-core": "^1.0.4",
     "@tensorflow/tfjs-node": "^1.0.3",
-    "face-api.js": "^0.19.0"
+    "face-api.js": "^0.19.0",
+    "vsls": "^0.3.1291"
   },
   "extensionDependencies": [
     "ms-vsliveshare.vsliveshare"
