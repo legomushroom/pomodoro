@@ -12,130 +12,109 @@
 // limitations under the License.
 // Author: Dongseong Hwang (dongseong.hwang@intel.com)
 
-const { desktopCapturer, ipcRenderer } = require('electron');
+const { ipcRenderer } = require('electron');
 
-let desktopSharing = false;
-let localStream;
+(async () => {
+  const emojiesMap = {
+    'neutral': '😐',
+    'happy': '😊',
+    'sad': '😥',
+    'angry': '😠', // 😡
+    'fearful': '😨',
+    'disgusted': '🤢',
+    'surprised': '😮'
+  };
 
-const PORT = 9000;
-var express = require('express');
-var expressApp = express();
-var ExpressPeerServer = require('peer').ExpressPeerServer;
+  const MODEL_URL = './models';
 
-// ipcRenderer.on('share', (event, message) => {
-//   console.log(message);
-// });
+  await faceapi.loadSsdMobilenetv1Model(MODEL_URL);
+  await faceapi.loadFaceRecognitionModel(MODEL_URL);
+  await faceapi.loadFaceExpressionModel(MODEL_URL)
 
-expressApp.get('/', function(req, res, next) { res.send('Hello world!'); });
+  // SsdMobilenetv1Options
+  const minConfidence = 0.5
 
-var options = {
-    debug: true
-}
+  // TinyFaceDetectorOptions
+  const inputSize = 408
+  const scoreThreshold = 0.5
 
-var server = require('http').createServer(expressApp);
+  // MtcnnOptions
+  const minFaceSize = 50
+  const scaleFactor = 0.8
 
-expressApp.use('/peerjs', ExpressPeerServer(server, options));
+  xRatio = 400 / 640;
+  yRatio = 300 / 480;
 
-server.listen(PORT);
-
-var peer1 = new Peer('electron-app1', {host: 'localhost', port: PORT, path: 'peerjs' });
-
-var conn = peer1.connect('electron-app2');
-
-peer1.on('connection', function(conn) {
-  conn.on('data', function(data){
-    var call = peer1.call('electron-app2', localStream);
-  });
-});
-
-function refresh() {
-  $('select').imagepicker({
-    hide_select : true
-  });
-}
-
-function addSource(source) {
-  $('select').append($('<option>', {
-    value: source.id.replace(":", ""),
-    text: source.name
-  }));
-  $('select option[value="' + source.id.replace(":", "") + '"]').attr('data-img-src', source.thumbnail.toDataURL());
-  refresh();
-}
-
-function showSources() {
-  desktopCapturer.getSources({ types:['window', 'screen'], thumbnailSize: { width: 1680, height: 1680 } }, function(error, sources) {
-    for (let source of sources) {
-      addSource(source);
-    }
-  });
-}
-
-function toggle() {
-  if (!desktopSharing) {
-    var id = ($('select').val()).replace(/window|screen/g, function(match) { return match + ":"; });
-    onAccessApproved(id);
-  } else {
-    desktopSharing = false;
-
-    if (localStream) {
-      localStream.getTracks()[0].stop();
-    }
-
-    localStream = null;
-
-    document.querySelector('button').innerHTML = "Enable Capture";
-
-    $('select').empty();
-    showSources();
-    refresh();
-  }
-}
-
-function onAccessApproved(desktop_id) {
-  if (!desktop_id) {
-    return;
-  }
-  desktopSharing = true;
-  document.querySelector('button').innerHTML = "Disable Capture";
-  navigator.webkitGetUserMedia({
-    audio: false,
-    video: {
-      mandatory: {
-        chromeMediaSource: 'desktop',
-        chromeMediaSourceId: desktop_id,
-        minWidth: 3360,
-        maxWidth: 3360,
-        minHeight: 2100,
-        maxHeight: 2100
-      }
-    }
-  }, gotStream, getUserMediaError);
-
-  function gotStream(stream) {
-    localStream = stream;
-    document.querySelector('video').src = URL.createObjectURL(stream);
-
-    stream.onended = function() {
-      if (desktopSharing) {
-        toggle();
-      }
-    };
-
-    ipcRenderer.send('share screen', PORT);
+  function getFaceDetectorOptions(net) {
+    return net === faceapi.nets.ssdMobilenetv1
+      ? new faceapi.SsdMobilenetv1Options({ minConfidence })
+      : (net === faceapi.nets.tinyFaceDetector
+        ? new faceapi.TinyFaceDetectorOptions({ inputSize, scoreThreshold })
+        : new faceapi.MtcnnOptions({ minFaceSize, scaleFactor })
+      )
   }
 
-  function getUserMediaError(e) {
-    console.log('getUserMediaError: ' + JSON.stringify(e, null, '---'));
+  const faceDetectionOptions = getFaceDetectorOptions(faceapi.nets.ssdMobilenetv1);
+
+  const videoEl = document.querySelector('#js-vsls-video');
+  const canvasEl = document.querySelector('#js-vsls-canvas');
+  const imageEl = document.querySelector('#js-vsls-image');
+  const emojiEl = document.querySelector('#js-vsls-emoji');
+
+  faceapi.env.monkeyPatch({
+    Canvas: HTMLCanvasElement,
+    Image: HTMLImageElement,
+    ImageData: ImageData,
+    Video: HTMLVideoElement,
+    createCanvasElement: () => document.createElement('canvas'),
+    createImageElement: () => document.createElement('img')
+  })
+
+  if (navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(function (stream) {
+        videoEl.srcObject = stream;
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+      var ctx = canvasEl.getContext('2d');
+      
+      setInterval(async () => {
+        ctx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
+        const imgData = canvasEl.toDataURL('image/jpg');
+
+        imageEl.onload = async () => {
+          const fullFaceDescriptions = await faceapi.detectAllFaces(imageEl, faceDetectionOptions)
+            .withFaceExpressions();
+
+          fullFaceDescriptions.map(({ detection, expressions }) => {
+            const result = expressions.reduce((acc, item) => {
+                if (acc.probability < item.probability) {
+                    return item;
+                }
+                return acc;
+            }, expressions[0]);
+
+            emojiEl.setAttribute('class', `vsls-emoji is-${result.expression}`);
+            
+            emojiEl.style.top = Math.round(detection.box.top * yRatio) - 40;
+            emojiEl.style.left = Math.round(detection.box.left * xRatio) - 40;
+
+            if (result) {
+              ipcRenderer.send('vsls-expression-update', result.expression);
+            }
+            
+          });
+          
+        }
+
+        imageEl.src = imgData;
+        
+      }, 1000);
   }
-}
 
-$(document).ready(function() {
-  showSources();
-  refresh();
-});
+})();
 
-document.querySelector('button').addEventListener('click', function(e) {
-  toggle();
-});
-
+// const { ipcRenderer } = require('electron');

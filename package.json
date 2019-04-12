@@ -1,11 +1,11 @@
 {
   "name": "vsls-emoji",
-  "displayName": "Live Share Pomodoro",
+  "displayName": "Live Share Emoji",
   "publisher": "lostintangent",
-  "description": "Adds a collaborative pomodoro timer to Visual Studio Live Share sessions",
+  "description": "Adds a emoji expressions",
   "version": "0.1.0",
   "preview": true,
-  "icon": "images/icon.png",
+  "icon": "images/logo.png",
   "homepage": "https://github.com/vsls-contrib/pomodoro",
   "repository": {
     "type": "git",
@@ -23,7 +23,8 @@
   "keywords": [
     "collaboration",
     "pair programming",
-    "productivity"
+    "productivity",
+    "emojies"
   ],
   "activationEvents": [
     "*",
@@ -36,155 +37,10 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "liveshare.pomodoro.start",
-        "title": "Start",
-        "category": "Pomodoro",
-        "icon": {
-          "dark": "./images/play.svg",
-          "light": "./images/play.svg"
-        }
-      },
-      {
-        "command": "liveshare.pomodoro.stop",
-        "title": "Stop",
-        "category": "Pomodoro",
-        "icon": {
-          "dark": "./images/stop.svg",
-          "light": "./images/stop.svg"
-        }
-      },
-      {
-        "command": "liveshare.pomodoro.reset",
-        "title": "Reset",
-        "category": "Pomodoro",
-        "icon": {
-          "dark": "./images/cross.svg",
-          "light": "./images/cross.svg"
-        }
-      }
-    ],
+    "commands": [],
     "menus": {
-      "view/item/context": [
-        {
-          "command": "liveshare.pomodoro.stop",
-          "when": "viewItem == liveshare.pomodoro.controlsitem && liveshare.pomodoro.state == running",
-          "group": "inline"
-        },
-        {
-          "command": "liveshare.pomodoro.start",
-          "when": "viewItem == liveshare.pomodoro.controlsitem && liveshare.pomodoro.state == stopped",
-          "group": "inline"
-        },
-        {
-          "command": "liveshare.pomodoro.reset",
-          "when": "viewItem == liveshare.pomodoro.root",
-          "group": "inline"
-        },
-        {
-          "command": "liveshare.pomodoro.stop",
-          "when": "viewItem == liveshare.pomodoro.controlsitem && liveshare.pomodoro.state == running"
-        },
-        {
-          "command": "liveshare.pomodoro.start",
-          "when": "viewItem == liveshare.pomodoro.controlsitem && liveshare.pomodoro.state == stopped"
-        },
-        {
-          "command": "liveshare.pomodoro.reset",
-          "when": "viewItem == liveshare.pomodoro.root"
-        }
-      ],
-      "commandPalette": [
-        {
-          "command": "liveshare.pomodoro.start",
-          "when": "liveshare.pomodoro.state == stopped || liveshare.pomodoro.state == paused"
-        },
-        {
-          "command": "liveshare.pomodoro.stop",
-          "when": "liveshare.pomodoro.state == running"
-        },
-        {
-          "command": "liveshare.pomodoro.reset",
-          "when": "liveshare.pomodoro.state == running || liveshare.pomodoro.state == paused"
-        }
-      ]
-    },
-    "configuration": {
-      "type": "object",
-      "title": "VS Live Share Pomodoro",
-      "properties": {
-        "vsls-pomodoro.intervalDuration": {
-          "default": 25,
-          "type": "number",
-          "description": "Specifies the duration of each individual interval in minutes."
-        },
-        "vsls-pomodoro.breakDuration": {
-          "default": 5,
-          "type": "number",
-          "description": "Specifies the duration of each short break in minutes."
-        },
-        "vsls-pomodoro.longBreakDuration": {
-          "default": 15,
-          "type": "number",
-          "description": "Specifies the duration of each long break in minutes."
-        },
-        "vsls-pomodoro.intervalCount": {
-          "default": 4,
-          "type": "number",
-          "description": "Specifies the number of intervals to perform within a pomodoro session."
-        },
-        "vsls-pomodoro.getStartedEmoji": {
-          "default": "🍅",
-          "type": "string",
-          "description": "Specifies the emoji displayed before starting a pomodoro"
-        },
-        "vsls-pomodoro.workingEmoji": {
-          "default": "🔨",
-          "type": "string",
-          "description": "Specifies the emoji displayed while within an interval"
-        },
-        "vsls-pomodoro.breakEmoji": {
-          "default": "🌴",
-          "type": "string",
-          "description": "Specifies the emoji displaying during a break"
-        },
-        "vsls-pomodoro.longBreakEmoji": {
-          "default": "🏖️",
-          "type": "string",
-          "description": "Specifies the emoji displayed during a long break"
-        },
-        "vsls-pomodoro.finishedEmoji": {
-          "default": "💪",
-          "type": "string",
-          "description": "Specifies the emoji displayed after you finish a pomodoro"
-        },
-        "vsls-pomodoro.getStartedLabel": {
-          "default": "Ready to work!",
-          "type": "string",
-          "description": "Specifies the label displayed before starting a pomodoro"
-        },
-        "vsls-pomodoro.workingLabel": {
-          "default": "Working",
-          "type": "string",
-          "description": "Specifies the label displayed while within an interval"
-        },
-        "vsls-pomodoro.breakLabel": {
-          "default": "Taking a break",
-          "type": "string",
-          "description": "Specifies the label displayed during a break"
-        },
-        "vsls-pomodoro.longBreakLabel": {
-          "default": "Taking a long break",
-          "type": "string",
-          "description": "Specifies the label displayed during a long break"
-        },
-        "vsls-pomodoro.finishedLabel": {
-          "default": "Well done!",
-          "type": "string",
-          "description": "Specifies the label displayed while within an interval"
-        }
-      }
+      "view/item/context": [],
+      "commandPalette": []
     }
   },
   "scripts": {
@@ -197,19 +53,15 @@
   "devDependencies": {
     "@types/mocha": "^2.2.42",
     "@types/node": "^8.10.25",
-    "@types/redux": "^3.6.0",
     "tslint": "^5.8.0",
     "typescript": "^3.1.4",
     "vscode": "^1.1.25",
     "vsls": "^0.3.1291"
   },
   "dependencies": {
+    "@tensorflow/tfjs-core": "^1.0.4",
     "@tensorflow/tfjs-node": "^1.0.3",
-    "canvas": "^2.4.1",
-    "face-api.js": "^0.19.0",
-    "node-webcam": "^0.4.6",
-    "redux": "^4.0.1",
-    "vsls-redux": "^1.0.3"
+    "face-api.js": "^0.19.0"
   },
   "extensionDependencies": [
     "ms-vsliveshare.vsliveshare"
