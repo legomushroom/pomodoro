@@ -83,7 +83,7 @@
 
 					var loader = new THREE.GLTFLoader().setPath( 'models/gltf/misc/' );
 					
-					loader.load( 'suz2.gltf', function ( gltf ) {
+					loader.load( 'suz3.gltf', function ( gltf ) {
 
 						gltf.scene.traverse( function ( child ) {
 
@@ -95,20 +95,23 @@
 
 						} );
 
-						scene.add( gltf.scene );
+						scene.add(gltf.scene);
 
-						const bone = scene.children[1].children[2].children[0];
-						const bone2 = bone.children[0];
-						// console.log(scene.children[1].children[2].children[0].children[0]);
-						
-						// let x = -225;
+						const suzzaneModel = scene.children[1].children[1];
+						const chinBone = scene.children[1].children[1].children[1].children[0];
+						const chinOriginalY = chinBone.position.y + 0.45;
 						// setInterval(() => {
-						// 	bone2.rotation.set(x, 0, 0);
-						// 	x += 0.001;
+						// 	chinBone.position.set(chinBone.position.x, chinBone.position.y - 0.001, chinBone.position.z);
 						// }, 16);
 
-						const suzzaneModel = scene.children[1].children[2];
-						console.log(suzzaneModel);
+						const getVerticle = function (index, vertices) {
+							const xIndex = 2 * index;
+
+							return {
+								x: vertices[xIndex],
+								y: vertices[xIndex + 1]
+							}
+						}
 
 						ipc.config.id = 'hello';
 						ipc.config.retry= 1500;
@@ -136,12 +139,18 @@
 								ipc.of.world.on(
 									'vsls-data',
 									function(faceData) {
-										// console.log(suzzaneModel, faceData);
-										const { transform } = faceData;
+										const { transform, vertices } = faceData;
 										const { rotation, scale } = transform;
+
+										const nosePoint = getVerticle(33, vertices);
+										const chinPoint = getVerticle(8, vertices);
+
 										suzzaneModel.rotation.set(rotation.x, -rotation.y, -rotation.z);
-										console.log(`scale: ${scale}`);
-										suzzaneModel.scale.set(scale/100, scale/100, scale/100);
+										const scaleP = scale / 100;
+										suzzaneModel.scale.set(scaleP, scaleP, scaleP);
+
+										const deltaY = ((1*(nosePoint.y - chinPoint.y) / 100) / scaleP);
+										chinBone.position.set(chinBone.position.x, (chinOriginalY + deltaY), chinBone.position.z);
 									}
 								);
 							}

@@ -15,6 +15,7 @@
 
 		drawing.stage				= new createjs.Stage(canvas);
 		drawing.faceTextures		= faceTextures;
+		drawing.ctx 				= canvas.getContext('2d');
 
 		drawing.container			= new createjs.Container();
 		drawing.clickArea			= new createjs.Shape();
@@ -100,16 +101,21 @@
 
 		clear && g.clear();
 
-		var i = 0;
-		var l = vertices.length;
+		let l = vertices.length;
 
-		for(; i < l;) {
-			var x = vertices[i++];
-			var y = vertices[i++];
+		for(let i = 0; i < (l / 2); i++) {
+			const t = i * 2;
+			let x = vertices[t];
+			let y = vertices[t + 1];
 
 			g.beginFill(fillColor);
 			g.drawCircle(x, y, radius);
 			g.endFill();
+
+			setTimeout(() => {
+				drawing.ctx.fillStyle = 'cyan';
+				drawing.ctx.fillText(i, x, y);
+			}, 1);
 		}
 	};
 

@@ -44,7 +44,7 @@ const { ipcRenderer } = require('electron');
 				ipcRenderer.send(
 					'vsls-face-data',
 					JSON.stringify({
-						// vertices: face.vertices,
+						vertices: face.vertices,
 						// triangles: face.triangles,
 						transform: {
 							rotation: {
