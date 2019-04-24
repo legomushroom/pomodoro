@@ -1,24 +1,24 @@
 import * as vscode from "vscode";
-import { ChildProcess, spawn } from 'child_process';
+import { spawn } from 'child_process';
 import * as path from 'path';
-import * as vsls from "vsls";
-import { AnimojiPageProvider } from "./animojiPageProvider";
+// import * as vsls from "vsls";
+// import { AnimojiPageProvider } from "./animojiPageProvider";
 
-const SERVICE_NAME = 'vsls-emoji';
+// const SERVICE_NAME = 'vsls-emoji';
 
-const EMOJI_CHANGED_EVENT = 'emoji-changed';
+// const EMOJI_CHANGED_EVENT = 'emoji-changed';
 
-const emojiesMap = {
-  'neutral': '😐',
-  'happy': '😊',
-  'sad': '😥',
-  'angry': '😠',
-  'fearful': '😨',
-  'disgusted': '🤢',
-  'surprised': '😮'
-};
+// const emojiesMap = {
+//   'neutral': '😐',
+//   'happy': '😊',
+//   'sad': '😥',
+//   'angry': '😠',
+//   'fearful': '😨',
+//   'disgusted': '🤢',
+//   'surprised': '😮'
+// };
 
-let child: ChildProcess;
+// let child: ChildProcess;
 
 const ipc = require('node-ipc');
 

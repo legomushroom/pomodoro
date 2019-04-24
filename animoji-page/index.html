@@ -37,6 +37,44 @@
 			var container, stats, controls;
 			var camera, scene, renderer;
 
+			// const getBone = (nameToFind, tree) => {
+			// 	if (!tree) {
+			// 		return null;
+			// 	}
+
+			// 	const children = [];
+			// 	for (let i = 0; i < tree.length; i++) {
+			// 		const item = tree[i];
+			// 		children.push(...item.children);
+			// 		if (item.name === nameToFind) {
+			// 			return item;
+			// 		}
+			// 	}
+
+			// 	return getBone(nameToFind, children);
+			// }
+
+			const getBone = (nameToFind, item) => {
+				if (!item) {
+					return null;
+				}
+
+				if (item.name === nameToFind) {
+					return item;
+				}
+
+				const childs = item.children;
+				for (let i = 0; i < childs.length; i++) {
+					const bone = getBone(nameToFind, childs[i]);
+					
+					if (bone) {
+						return bone;
+					}
+				}
+
+				return null;
+			}
+
 			init();
 			animate();
 
@@ -97,9 +135,25 @@
 
 						scene.add(gltf.scene);
 
-						const suzzaneModel = scene.children[1].children[1];
-						const chinBone = scene.children[1].children[1].children[1].children[0];
+						// const suzzaneModel = scene.children[1].children[1];
+						// const chinBone = scene.children[1].children[1].children[1].children[0];
+						const suzzaneModel = getBone('Armature', scene);
+						const chinBone = getBone('BoneChin', scene);
+						const mouth0 = getBone('BoneMouth0', scene);
+						const mouth1 = getBone('BoneMouth1', scene);
+						const mouth2 = getBone('BoneMouth2', scene);
+						const mouth3 = getBone('BoneMouth3', scene);
+						const mouth4 = getBone('BoneMouth4', scene);
+						const mouth5 = getBone('BoneMouth5', scene);
+
+						const mouth0StartPostion = { ...mouth0.position };
+						const mouth1StartPostion = { ...mouth1.position };
+						const mouth2StartPostion = { ...mouth2.position };
+						const mouth3StartPostion = { ...mouth3.position };
+						const mouth4StartPostion = { ...mouth4.position };
+
 						const chinOriginalY = chinBone.position.y + 0.45;
+
 						// setInterval(() => {
 						// 	chinBone.position.set(chinBone.position.x, chinBone.position.y - 0.001, chinBone.position.z);
 						// }, 16);
@@ -142,6 +196,7 @@
 										const { transform, vertices } = faceData;
 										const { rotation, scale } = transform;
 
+										// chin motion
 										const nosePoint = getVerticle(33, vertices);
 										const chinPoint = getVerticle(8, vertices);
 
@@ -149,8 +204,25 @@
 										const scaleP = scale / 100;
 										suzzaneModel.scale.set(scaleP, scaleP, scaleP);
 
-										const deltaY = ((1*(nosePoint.y - chinPoint.y) / 100) / scaleP);
+										const deltaY = ((.75*(nosePoint.y - chinPoint.y) / 100) / scaleP);
 										chinBone.position.set(chinBone.position.x, (chinOriginalY + deltaY), chinBone.position.z);
+
+										// mouth motion
+										const mouthLeft = getVerticle(48, vertices);
+										const mouthRight = getVerticle(54, vertices);
+										const mouthTop = getVerticle(51, vertices);
+										const mouthBottom = getVerticle(57, vertices);
+
+										// open mouth
+										const verticalDelta = ((mouthTop.y - mouthBottom.y + 15) / 200) / scaleP;
+										mouth1.position.set(mouth1StartPostion.x, mouth1StartPostion.y - verticalDelta, mouth1StartPostion.z);
+										mouth2.position.set(mouth2StartPostion.x, mouth2StartPostion.y - verticalDelta, mouth2StartPostion.z);
+										mouth3.position.set(mouth3StartPostion.x, mouth3StartPostion.y - verticalDelta, mouth3StartPostion.z);
+
+										// smile mouth
+										const horizontalDelta = (5 * (mouthRight.x - mouthLeft.x - 50) / 400) / scaleP;
+										mouth0.position.set(mouth0StartPostion.x - horizontalDelta, mouth0StartPostion.y, mouth0StartPostion.z);
+										mouth4.position.set(mouth4StartPostion.x + horizontalDelta, mouth4StartPostion.y, mouth4StartPostion.z);
 									}
 								);
 							}
