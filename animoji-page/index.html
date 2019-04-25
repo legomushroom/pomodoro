@@ -161,6 +161,9 @@
 						const mouth3 = getBone('BoneMouth3', scene);
 						const mouth4 = getBone('BoneMouth4', scene);
 						const mouth5 = getBone('BoneMouth5', scene);
+						const brow0 = getBone('BoneBrow0', scene);
+						const brow1 = getBone('BoneBrow1', scene);
+
 
 						const mouth0StartPostion = { ...mouth0.position };
 						const mouth1StartPostion = { ...mouth1.position };
@@ -168,6 +171,8 @@
 						const mouth3StartPostion = { ...mouth3.position };
 						const mouth4StartPostion = { ...mouth4.position };
 						const mouth5StartPostion = { ...mouth5.position };
+						const brow0StartPostion = { ...brow0.position };
+						const brow1StartPostion = { ...brow1.position };
 
 						const chinOriginalY = chinBone.position.y + 0.45;
 
@@ -228,6 +233,9 @@
 										const mouthRight = getVerticle(54, vertices);
 										const mouthTop = getVerticle(51, vertices);
 										const mouthBottom = getVerticle(57, vertices);
+										const browLeft = getVerticle(19, vertices);
+										const browRight = getVerticle(23, vertices);
+										const browCenter = getVerticle(39, vertices);
 										const vDeltaY = mouthTop.y - mouthBottom.y;
 										const vDeltaX = mouthTop.x - mouthBottom.x;
 										const hDeltaX = mouthRight.x - mouthLeft.x;
@@ -244,6 +252,15 @@
 										mouth5.position.set(mouth5StartPostion.x + (verticalDelta/4), mouth5StartPostion.y, mouth5StartPostion.z);
 										mouth4.position.set(mouth4StartPostion.x + (verticalDelta/4), mouth4StartPostion.y, mouth4StartPostion.z + horizontalDelta);
 
+										// eye brows
+										const browLeftDeltaX = browLeft.x - browCenter.x;
+										const browLeftDeltaY = browLeft.y - browCenter.y;
+										const browLeftDelta = (Math.sqrt((browLeftDeltaX * browLeftDeltaX) + (browLeftDeltaY * browLeftDeltaY)) - (30 * scaleP)) / scaleP;
+
+										console.log(Math.sqrt((browLeftDeltaX * browLeftDeltaX) + (browLeftDeltaY * browLeftDeltaY)), scaleP);
+
+										brow0.position.set(brow0StartPostion.x, brow0StartPostion.y + Math.max((browLeftDelta / 15), 0), brow0StartPostion.z);
+										// brow1.position.set(brow1StartPostion.x, brow1StartPostion.y, brow1StartPostion.z);
 									}
 								);
 							}
