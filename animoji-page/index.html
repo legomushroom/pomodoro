@@ -92,8 +92,10 @@
 
 				scene = new THREE.Scene();
 
-				var urls = [ 'posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg' ];
-				var loader = new THREE.CubeTextureLoader().setPath( 'textures/cube/Bridge2/' );
+				// var urls = [ 'nx.jpg', 'ny.jpg', 'nz.jpg', 'px.jpg', 'py.jpg', 'pz.jpg' ];
+				// var urls = [ 'posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg' ];
+				var urls = [ 'dark-s_nx.jpg', 'dark-s_ny.jpg', 'dark-s_nz.jpg', 'dark-s_px.jpg', 'dark-s_py.jpg', 'dark-s_pz.jpg' ];
+				var loader = new THREE.CubeTextureLoader().setPath( 'textures/cube/MilkyWay/' );
 				loader.load( urls, function ( texture ) {
 
 					texture.encoding = THREE.sRGBEncoding;
@@ -116,6 +118,20 @@
 					);
 					var lightProbe = new THREE.LightProbe( sh );
 					scene.add( lightProbe );
+
+					var ambientLight = new THREE.AmbientLight(0x999999 );
+					scene.add(ambientLight);
+					
+					var lights = [];
+					lights[0] = new THREE.DirectionalLight( 0xffffff, 1 );
+					lights[0].position.set( 1, 0, 0 );
+					lights[1] = new THREE.DirectionalLight( 0x3736A8, 1 );
+					lights[1].position.set( 0.75, 1, 0.5 );
+					lights[2] = new THREE.DirectionalLight( 0x8DCECF, 1 );
+					lights[2].position.set( -0.75, -1, 0.5 );
+					scene.add( lights[0] );
+					scene.add( lights[1] );
+					scene.add( lights[2] );
 
 					// model
 
@@ -151,6 +167,7 @@
 						const mouth2StartPostion = { ...mouth2.position };
 						const mouth3StartPostion = { ...mouth3.position };
 						const mouth4StartPostion = { ...mouth4.position };
+						const mouth5StartPostion = { ...mouth5.position };
 
 						const chinOriginalY = chinBone.position.y + 0.45;
 
@@ -207,22 +224,26 @@
 										const deltaY = ((.75*(nosePoint.y - chinPoint.y) / 100) / scaleP);
 										chinBone.position.set(chinBone.position.x, (chinOriginalY + deltaY), chinBone.position.z);
 
-										// mouth motion
 										const mouthLeft = getVerticle(48, vertices);
 										const mouthRight = getVerticle(54, vertices);
 										const mouthTop = getVerticle(51, vertices);
 										const mouthBottom = getVerticle(57, vertices);
+										const vDeltaY = mouthTop.y - mouthBottom.y;
+										const vDeltaX = mouthTop.x - mouthBottom.x;
+										const hDeltaX = mouthRight.x - mouthLeft.x;
+										const hDeltaY = mouthRight.y - mouthLeft.y;
+										const horizontalDelta = Math.max(((Math.sqrt((hDeltaX * hDeltaX) + (hDeltaY * hDeltaY)) - (47 * scaleP)) / 125) / scaleP, 0);
+										const verticalDelta = Math.max(((Math.sqrt((vDeltaX * vDeltaX) + (vDeltaY * vDeltaY)) - (14 * scaleP)) / 75) / scaleP, 0);
 
-										// open mouth
-										const verticalDelta = ((mouthTop.y - mouthBottom.y + 15) / 200) / scaleP;
-										mouth1.position.set(mouth1StartPostion.x, mouth1StartPostion.y - verticalDelta, mouth1StartPostion.z);
-										mouth2.position.set(mouth2StartPostion.x, mouth2StartPostion.y - verticalDelta, mouth2StartPostion.z);
-										mouth3.position.set(mouth3StartPostion.x, mouth3StartPostion.y - verticalDelta, mouth3StartPostion.z);
+										mouth1.position.set(mouth1StartPostion.x - verticalDelta, mouth1StartPostion.y, mouth1StartPostion.z - (horizontalDelta/2));
+										mouth2.position.set(mouth2StartPostion.x - verticalDelta, mouth2StartPostion.y, mouth2StartPostion.z);
+										mouth3.position.set(mouth3StartPostion.x - verticalDelta, mouth3StartPostion.y, mouth3StartPostion.z + (horizontalDelta/2));
 
 										// smile mouth
-										const horizontalDelta = (5 * (mouthRight.x - mouthLeft.x - 50) / 400) / scaleP;
-										mouth0.position.set(mouth0StartPostion.x - horizontalDelta, mouth0StartPostion.y, mouth0StartPostion.z);
-										mouth4.position.set(mouth4StartPostion.x + horizontalDelta, mouth4StartPostion.y, mouth4StartPostion.z);
+										mouth0.position.set(mouth0StartPostion.x + (verticalDelta/4), mouth0StartPostion.y, mouth0StartPostion.z - horizontalDelta);
+										mouth5.position.set(mouth5StartPostion.x + (verticalDelta/4), mouth5StartPostion.y, mouth5StartPostion.z);
+										mouth4.position.set(mouth4StartPostion.x + (verticalDelta/4), mouth4StartPostion.y, mouth4StartPostion.z + horizontalDelta);
+
 									}
 								);
 							}
