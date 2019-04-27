@@ -17,12 +17,15 @@
 
 	<body>
 		<script src="js/three.js"></script>
+		<!-- <script src="js/detect-blink.js"></script> -->
 
 		<script src="js/controls/OrbitControls.js"></script>
 		<script src="js/loaders/GLTFLoader.js"></script>
 
 		<script src="js/WebGL.js"></script>
 		<script src="js/libs/stats.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/mo-js@0.288.2/build/mo.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/mojs-player@0.43.16/build/mojs-player.min.js"></script>
 
 		<script>
 
@@ -186,9 +189,6 @@
 						const mouth4StartPostion = { ...mouth4.position };
 						const mouth5StartPostion = { ...mouth5.position };
 
-						// const brow0StartPostion = { ...brow0.position };
-						// const brow1StartPostion = { ...brow1.position };
-
 						const eyeLeft0StartPostion = { ...eyeLeft0.position };
 						const eyeLeft1StartPostion = { ...eyeLeft1.position };
 						const eyeLeft2StartPostion = { ...eyeLeft2.position };
@@ -208,6 +208,74 @@
 						// setInterval(() => {
 						// 	chinBone.position.set(chinBone.position.x, chinBone.position.y - 0.001, chinBone.position.z);
 						// }, 16);
+
+						const leftEyeBlink = (p) => {
+							const eyeLeftDelta = .2;
+							eyeLeft0.position.set(eyeLeft0StartPostion.x, eyeLeft0StartPostion.y - .55*eyeLeftDelta*p, eyeLeft0StartPostion.z);
+							eyeLeft1.position.set(eyeLeft1StartPostion.x, eyeLeft1StartPostion.y + .55*eyeLeftDelta*p, eyeLeft1StartPostion.z);
+
+							eyeLeft5.position.set(eyeLeft5StartPostion.x, eyeLeft5StartPostion.y - .75*eyeLeftDelta*p, eyeLeft5StartPostion.z);
+							eyeLeft2.position.set(eyeLeft2StartPostion.x, eyeLeft2StartPostion.y + .9*eyeLeftDelta*p, eyeLeft2StartPostion.z);
+
+							eyeLeft4.position.set(eyeLeft4StartPostion.x, eyeLeft4StartPostion.y - .5*eyeLeftDelta*p, eyeLeft4StartPostion.z);
+							eyeLeft3.position.set(eyeLeft3StartPostion.x, eyeLeft3StartPostion.y + .5*eyeLeftDelta*p, eyeLeft3StartPostion.z);	
+						}
+
+						const rightEyeBlink = (p) => {
+							const eyeRightDelta = .2;
+							eyeRight0.position.set(eyeRight0StartPostion.x, eyeRight0StartPostion.y - .55*eyeRightDelta*p, eyeRight0StartPostion.z);
+							eyeRight1.position.set(eyeRight1StartPostion.x, eyeRight1StartPostion.y + .55*eyeRightDelta*p, eyeRight1StartPostion.z);
+
+							eyeRight5.position.set(eyeRight5StartPostion.x, eyeRight5StartPostion.y - .75*eyeRightDelta*p, eyeRight5StartPostion.z);
+							eyeRight2.position.set(eyeRight2StartPostion.x, eyeRight2StartPostion.y + .9*eyeRightDelta*p, eyeRight2StartPostion.z);
+
+							eyeRight4.position.set(eyeRight4StartPostion.x, eyeRight4StartPostion.y - .5*eyeRightDelta*p, eyeRight4StartPostion.z);
+							eyeRight3.position.set(eyeRight3StartPostion.x, eyeRight3StartPostion.y + .5*eyeRightDelta*p, eyeRight3StartPostion.z);	
+						}
+
+
+						const createBlink = (isLeft) => {
+							const tm = new mojs.Timeline();
+
+							const handler = (isLeft)
+									? leftEyeBlink
+									: rightEyeBlink;
+
+							const downTween = new mojs.Tween({
+								// easing: 'ease.out',
+								duration: 40,
+								onUpdate: handler
+							});
+
+							const upTween = new mojs.Tween({
+								// easing: 'ease.in',
+								duration: 80,
+								onUpdate: (p) => {
+									p = 1 - p;
+									handler(p);
+								}
+							});
+
+							tm
+								.add(downTween)
+								.append(upTween);
+
+							return tm;
+						}
+
+						const mainBlinkTimeline = new mojs.Timeline({ delay: 2000, repeat: 9999 });
+						const blinkTimeline = new mojs.Timeline({ repeat: 1, delay: 'rand(0, 100)' });
+						blinkTimeline
+							.add(createBlink(true))
+							.add(createBlink(false));
+
+						mainBlinkTimeline
+							.add(blinkTimeline);
+
+						mainBlinkTimeline
+							.play();
+
+						// const mojsPlayer = new MojsPlayer({ add: mainTimeline, isPlaying: true, isRepeat: true, isSaveState: true });
 
 						const getVerticle = function (index, vertices) {
 							const xIndex = 2 * index;
@@ -262,9 +330,7 @@
 										const mouthRight = getVerticle(54, vertices);
 										const mouthTop = getVerticle(51, vertices);
 										const mouthBottom = getVerticle(57, vertices);
-										// const browLeft = getVerticle(19, vertices);
-										// const browRight = getVerticle(23, vertices);
-										// const browCenter = getVerticle(39, vertices);
+
 										const vDeltaY = mouthTop.y - mouthBottom.y;
 										const vDeltaX = mouthTop.x - mouthBottom.x;
 										const hDeltaX = mouthRight.x - mouthLeft.x;
@@ -281,41 +347,65 @@
 										mouth5.position.set(mouth5StartPostion.x + (verticalDelta/4), mouth5StartPostion.y, mouth5StartPostion.z);
 										mouth4.position.set(mouth4StartPostion.x + (verticalDelta/4), mouth4StartPostion.y, mouth4StartPostion.z + horizontalDelta);
 
-										// eye left
-										const eyeLeftTop = getVerticle(44, vertices);
-										const eyeLeftBottom = getVerticle(46, vertices);
+										if (verticalDelta > .25) {
+											mainBlinkTimeline.pause();
+										} else {
+											mainBlinkTimeline.play();
+										}
 
-										const eyeLeftDeltaX = eyeLeftTop.x - eyeLeftBottom.x;
-										const eyeLeftDeltaY = eyeLeftTop.y - eyeLeftBottom.y;
-										const eyeLeftDelta = ((Math.sqrt((eyeLeftDeltaX * eyeLeftDeltaX) + (eyeLeftDeltaY * eyeLeftDeltaY)) - (5.6 * scaleP)) / 7) / scaleP;
+										// console.log(verticalDelta);
 
-										const deL = Math.min(Math.max(-eyeLeftDelta, 0), 0.125*scaleP);
-										eyeLeft0.position.set(eyeLeft0StartPostion.x, eyeLeft0StartPostion.y - .5*deL, eyeLeft0StartPostion.z);
-										eyeLeft1.position.set(eyeLeft1StartPostion.x, eyeLeft1StartPostion.y + .5*deL, eyeLeft1StartPostion.z);
+										// const blink = vslsDetectBlink(vertices);
+										// console.log(`-=-=-=-=-=-=-=-=-`);
+										// switch(blink) {
+										// 	case 0: {
+										// 		console.log('left');
+										// 	}
+										// 	case 1: {
+										// 		console.log('right');
+										// 	}
+										// 	case 2: {
+										// 		console.log('both');
+										// 	}
+										// 	default: {
+										// 	}
+										// }
 
-										eyeLeft5.position.set(eyeLeft5StartPostion.x, eyeLeft5StartPostion.y - .85*deL, eyeLeft5StartPostion.z);
-										eyeLeft2.position.set(eyeLeft2StartPostion.x, eyeLeft2StartPostion.y + 1.1*deL, eyeLeft2StartPostion.z);
+										// // eye left
+										// const eyeLeftTop = getVerticle(44, vertices);
+										// const eyeLeftBottom = getVerticle(46, vertices);
 
-										eyeLeft4.position.set(eyeLeft4StartPostion.x, eyeLeft4StartPostion.y - .4*deL, eyeLeft4StartPostion.z);
-										eyeLeft3.position.set(eyeLeft3StartPostion.x, eyeLeft3StartPostion.y + .4*deL, eyeLeft3StartPostion.z);	
+										// const eyeLeftDeltaX = eyeLeftTop.x - eyeLeftBottom.x;
+										// const eyeLeftDeltaY = eyeLeftTop.y - eyeLeftBottom.y;
+										// const eyeLeftDelta = ((Math.sqrt((eyeLeftDeltaX * eyeLeftDeltaX) + (eyeLeftDeltaY * eyeLeftDeltaY)) - (5.6 * scaleP)) / 7) / scaleP;
 
-										// eye right
-										const eyeRightTop = getVerticle(37, vertices);
-										const eyeRightBottom = getVerticle(41, vertices);
+										// const deL = Math.min(Math.max(-eyeLeftDelta, 0), 0.125*scaleP);
+										// eyeLeft0.position.set(eyeLeft0StartPostion.x, eyeLeft0StartPostion.y - .5*deL, eyeLeft0StartPostion.z);
+										// eyeLeft1.position.set(eyeLeft1StartPostion.x, eyeLeft1StartPostion.y + .5*deL, eyeLeft1StartPostion.z);
 
-										const eyeRightDeltaX = eyeRightTop.x - eyeRightBottom.x;
-										const eyeRightDeltaY = eyeRightTop.y - eyeRightBottom.y;
-										const eyeRightDelta = ((Math.sqrt((eyeRightDeltaX * eyeRightDeltaX) + (eyeRightDeltaY * eyeRightDeltaY)) - (5.88 * scaleP)) / 7) / scaleP;
+										// eyeLeft5.position.set(eyeLeft5StartPostion.x, eyeLeft5StartPostion.y - .85*deL, eyeLeft5StartPostion.z);
+										// eyeLeft2.position.set(eyeLeft2StartPostion.x, eyeLeft2StartPostion.y + 1.1*deL, eyeLeft2StartPostion.z);
 
-										const deR = Math.min(Math.max(-eyeRightDelta, 0), 0.125*scaleP);
-										eyeRight0.position.set(eyeRight0StartPostion.x, eyeRight0StartPostion.y - .5*deR, eyeRight0StartPostion.z);
-										eyeRight1.position.set(eyeRight1StartPostion.x, eyeRight1StartPostion.y + .5*deR, eyeRight1StartPostion.z);
+										// eyeLeft4.position.set(eyeLeft4StartPostion.x, eyeLeft4StartPostion.y - .4*deL, eyeLeft4StartPostion.z);
+										// eyeLeft3.position.set(eyeLeft3StartPostion.x, eyeLeft3StartPostion.y + .4*deL, eyeLeft3StartPostion.z);	
 
-										eyeRight5.position.set(eyeRight5StartPostion.x, eyeRight5StartPostion.y - .85*deR, eyeRight5StartPostion.z);
-										eyeRight2.position.set(eyeRight2StartPostion.x, eyeRight2StartPostion.y + 1.1*deR, eyeRight2StartPostion.z);
+										// // eye right
+										// const eyeRightTop = getVerticle(37, vertices);
+										// const eyeRightBottom = getVerticle(41, vertices);
 
-										eyeRight4.position.set(eyeRight4StartPostion.x, eyeRight4StartPostion.y - .4*deR, eyeRight4StartPostion.z);
-										eyeRight3.position.set(eyeRight3StartPostion.x, eyeRight3StartPostion.y + .4*deR, eyeRight3StartPostion.z);
+										// const eyeRightDeltaX = eyeRightTop.x - eyeRightBottom.x;
+										// const eyeRightDeltaY = eyeRightTop.y - eyeRightBottom.y;
+										// const eyeRightDelta = ((Math.sqrt((eyeRightDeltaX * eyeRightDeltaX) + (eyeRightDeltaY * eyeRightDeltaY)) - (5.88 * scaleP)) / 7) / scaleP;
+
+										// const deR = Math.min(Math.max(-eyeRightDelta, 0), 0.125*scaleP);
+										// eyeRight0.position.set(eyeRight0StartPostion.x, eyeRight0StartPostion.y - .5*deR, eyeRight0StartPostion.z);
+										// eyeRight1.position.set(eyeRight1StartPostion.x, eyeRight1StartPostion.y + .5*deR, eyeRight1StartPostion.z);
+
+										// eyeRight5.position.set(eyeRight5StartPostion.x, eyeRight5StartPostion.y - .85*deR, eyeRight5StartPostion.z);
+										// eyeRight2.position.set(eyeRight2StartPostion.x, eyeRight2StartPostion.y + 1.1*deR, eyeRight2StartPostion.z);
+
+										// eyeRight4.position.set(eyeRight4StartPostion.x, eyeRight4StartPostion.y - .4*deR, eyeRight4StartPostion.z);
+										// eyeRight3.position.set(eyeRight3StartPostion.x, eyeRight3StartPostion.y + .4*deR, eyeRight3StartPostion.z);
 									}
 								);
 							}
