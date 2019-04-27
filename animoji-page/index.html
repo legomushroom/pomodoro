@@ -161,9 +161,23 @@
 						const mouth3 = getBone('BoneMouth3', scene);
 						const mouth4 = getBone('BoneMouth4', scene);
 						const mouth5 = getBone('BoneMouth5', scene);
-						const brow0 = getBone('BoneBrow0', scene);
-						const brow1 = getBone('BoneBrow1', scene);
 
+						// const brow0 = getBone('BoneBrow0', scene);
+						// const brow1 = getBone('BoneBrow1', scene);
+
+						const eyeLeft0 = getBone('BoneEyeLeft0', scene);
+						const eyeLeft1 = getBone('BoneEyeLeft1', scene);
+						const eyeLeft2 = getBone('BoneEyeLeft2', scene);
+						const eyeLeft3 = getBone('BoneEyeLeft3', scene);
+						const eyeLeft4 = getBone('BoneEyeLeft4', scene);
+						const eyeLeft5 = getBone('BoneEyeLeft5', scene);
+
+						const eyeRight0 = getBone('BoneEyeRight0', scene);
+						const eyeRight1 = getBone('BoneEyeRight1', scene);
+						const eyeRight2 = getBone('BoneEyeRight2', scene);
+						const eyeRight3 = getBone('BoneEyeRight3', scene);
+						const eyeRight4 = getBone('BoneEyeRight4', scene);
+						const eyeRight5 = getBone('BoneEyeRight5', scene);
 
 						const mouth0StartPostion = { ...mouth0.position };
 						const mouth1StartPostion = { ...mouth1.position };
@@ -171,8 +185,23 @@
 						const mouth3StartPostion = { ...mouth3.position };
 						const mouth4StartPostion = { ...mouth4.position };
 						const mouth5StartPostion = { ...mouth5.position };
-						const brow0StartPostion = { ...brow0.position };
-						const brow1StartPostion = { ...brow1.position };
+
+						// const brow0StartPostion = { ...brow0.position };
+						// const brow1StartPostion = { ...brow1.position };
+
+						const eyeLeft0StartPostion = { ...eyeLeft0.position };
+						const eyeLeft1StartPostion = { ...eyeLeft1.position };
+						const eyeLeft2StartPostion = { ...eyeLeft2.position };
+						const eyeLeft3StartPostion = { ...eyeLeft3.position };
+						const eyeLeft4StartPostion = { ...eyeLeft4.position };
+						const eyeLeft5StartPostion = { ...eyeLeft5.position };
+
+						const eyeRight0StartPostion = { ...eyeRight0.position };
+						const eyeRight1StartPostion = { ...eyeRight1.position };
+						const eyeRight2StartPostion = { ...eyeRight2.position };
+						const eyeRight3StartPostion = { ...eyeRight3.position };
+						const eyeRight4StartPostion = { ...eyeRight4.position };
+						const eyeRight5StartPostion = { ...eyeRight5.position };
 
 						const chinOriginalY = chinBone.position.y + 0.45;
 
@@ -233,9 +262,9 @@
 										const mouthRight = getVerticle(54, vertices);
 										const mouthTop = getVerticle(51, vertices);
 										const mouthBottom = getVerticle(57, vertices);
-										const browLeft = getVerticle(19, vertices);
-										const browRight = getVerticle(23, vertices);
-										const browCenter = getVerticle(39, vertices);
+										// const browLeft = getVerticle(19, vertices);
+										// const browRight = getVerticle(23, vertices);
+										// const browCenter = getVerticle(39, vertices);
 										const vDeltaY = mouthTop.y - mouthBottom.y;
 										const vDeltaX = mouthTop.x - mouthBottom.x;
 										const hDeltaX = mouthRight.x - mouthLeft.x;
@@ -252,15 +281,41 @@
 										mouth5.position.set(mouth5StartPostion.x + (verticalDelta/4), mouth5StartPostion.y, mouth5StartPostion.z);
 										mouth4.position.set(mouth4StartPostion.x + (verticalDelta/4), mouth4StartPostion.y, mouth4StartPostion.z + horizontalDelta);
 
-										// eye brows
-										const browLeftDeltaX = browLeft.x - browCenter.x;
-										const browLeftDeltaY = browLeft.y - browCenter.y;
-										const browLeftDelta = (Math.sqrt((browLeftDeltaX * browLeftDeltaX) + (browLeftDeltaY * browLeftDeltaY)) - (30 * scaleP)) / scaleP;
+										// eye left
+										const eyeLeftTop = getVerticle(44, vertices);
+										const eyeLeftBottom = getVerticle(46, vertices);
 
-										console.log(Math.sqrt((browLeftDeltaX * browLeftDeltaX) + (browLeftDeltaY * browLeftDeltaY)), scaleP);
+										const eyeLeftDeltaX = eyeLeftTop.x - eyeLeftBottom.x;
+										const eyeLeftDeltaY = eyeLeftTop.y - eyeLeftBottom.y;
+										const eyeLeftDelta = ((Math.sqrt((eyeLeftDeltaX * eyeLeftDeltaX) + (eyeLeftDeltaY * eyeLeftDeltaY)) - (5.6 * scaleP)) / 7) / scaleP;
 
-										brow0.position.set(brow0StartPostion.x, brow0StartPostion.y + Math.max((browLeftDelta / 15), 0), brow0StartPostion.z);
-										// brow1.position.set(brow1StartPostion.x, brow1StartPostion.y, brow1StartPostion.z);
+										const deL = Math.min(Math.max(-eyeLeftDelta, 0), 0.125*scaleP);
+										eyeLeft0.position.set(eyeLeft0StartPostion.x, eyeLeft0StartPostion.y - .5*deL, eyeLeft0StartPostion.z);
+										eyeLeft1.position.set(eyeLeft1StartPostion.x, eyeLeft1StartPostion.y + .5*deL, eyeLeft1StartPostion.z);
+
+										eyeLeft5.position.set(eyeLeft5StartPostion.x, eyeLeft5StartPostion.y - .85*deL, eyeLeft5StartPostion.z);
+										eyeLeft2.position.set(eyeLeft2StartPostion.x, eyeLeft2StartPostion.y + 1.1*deL, eyeLeft2StartPostion.z);
+
+										eyeLeft4.position.set(eyeLeft4StartPostion.x, eyeLeft4StartPostion.y - .4*deL, eyeLeft4StartPostion.z);
+										eyeLeft3.position.set(eyeLeft3StartPostion.x, eyeLeft3StartPostion.y + .4*deL, eyeLeft3StartPostion.z);	
+
+										// eye right
+										const eyeRightTop = getVerticle(37, vertices);
+										const eyeRightBottom = getVerticle(41, vertices);
+
+										const eyeRightDeltaX = eyeRightTop.x - eyeRightBottom.x;
+										const eyeRightDeltaY = eyeRightTop.y - eyeRightBottom.y;
+										const eyeRightDelta = ((Math.sqrt((eyeRightDeltaX * eyeRightDeltaX) + (eyeRightDeltaY * eyeRightDeltaY)) - (5.88 * scaleP)) / 7) / scaleP;
+
+										const deR = Math.min(Math.max(-eyeRightDelta, 0), 0.125*scaleP);
+										eyeRight0.position.set(eyeRight0StartPostion.x, eyeRight0StartPostion.y - .5*deR, eyeRight0StartPostion.z);
+										eyeRight1.position.set(eyeRight1StartPostion.x, eyeRight1StartPostion.y + .5*deR, eyeRight1StartPostion.z);
+
+										eyeRight5.position.set(eyeRight5StartPostion.x, eyeRight5StartPostion.y - .85*deR, eyeRight5StartPostion.z);
+										eyeRight2.position.set(eyeRight2StartPostion.x, eyeRight2StartPostion.y + 1.1*deR, eyeRight2StartPostion.z);
+
+										eyeRight4.position.set(eyeRight4StartPostion.x, eyeRight4StartPostion.y - .4*deR, eyeRight4StartPostion.z);
+										eyeRight3.position.set(eyeRight3StartPostion.x, eyeRight3StartPostion.y + .4*deR, eyeRight3StartPostion.z);
 									}
 								);
 							}
