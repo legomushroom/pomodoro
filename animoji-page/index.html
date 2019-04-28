@@ -29,6 +29,10 @@
 
 		<script>
 
+			const clamp = (value, min, max) => {
+				return Math.min(Math.max(value, min), max);
+			}
+
 			const ipc = require('node-ipc');
 
 			if (WEBGL.isWebGLAvailable() === false ) {
@@ -97,7 +101,8 @@
 
 				// var urls = [ 'nx.jpg', 'ny.jpg', 'nz.jpg', 'px.jpg', 'py.jpg', 'pz.jpg' ];
 				// var urls = [ 'posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg' ];
-				var urls = [ 'dark-s_nx.jpg', 'dark-s_ny.jpg', 'dark-s_nz.jpg', 'dark-s_px.jpg', 'dark-s_py.jpg', 'dark-s_pz.jpg' ];
+				// var urls = [ 'dark-s_nx.jpg', 'dark-s_ny.jpg', 'dark-s_nz.jpg', 'dark-s_px.jpg', 'dark-s_py.jpg', 'dark-s_pz.jpg' ];
+				var urls = [ 'dark-s_pz2.jpg', 'dark-s_pz2.jpg', 'dark-s_pz2.jpg', 'dark-s_pz2.jpg', 'dark-s_pz2.jpg', 'dark-s_pz2.jpg' ];
 				var loader = new THREE.CubeTextureLoader().setPath( 'textures/cube/MilkyWay/' );
 				loader.load( urls, function ( texture ) {
 
@@ -127,17 +132,19 @@
 					
 					var lights = [];
 					lights[0] = new THREE.DirectionalLight( 0xffffff, 1 );
-					lights[0].position.set( 1, 0, 0 );
-					lights[1] = new THREE.DirectionalLight( 0x3736A8, 1 );
-					lights[1].position.set( 0.75, 1, 0.5 );
-					lights[2] = new THREE.DirectionalLight( 0x8DCECF, 1 );
-					lights[2].position.set( -0.75, -1, 0.5 );
+					lights[0].position.set( 1, 1, 1 );
+					lights[1] = new THREE.DirectionalLight( 0xffffff, .5 );
+					lights[1].position.set( 1, -1, 3 );
+					lights[2] = new THREE.DirectionalLight( 0xF02FC2, 1 );
+					lights[2].position.set( -3, 3, 0 );
+					lights[3] = new THREE.DirectionalLight( 0x6094EA, 1 );
+					lights[3].position.set( 4, -4, 0 );
 					scene.add( lights[0] );
 					scene.add( lights[1] );
 					scene.add( lights[2] );
+					scene.add( lights[3] );
 
 					// model
-
 					var loader = new THREE.GLTFLoader().setPath( 'models/gltf/misc/' );
 					
 					loader.load( 'suz3.gltf', function ( gltf ) {
@@ -181,6 +188,9 @@
 						const eyeRight3 = getBone('BoneEyeRight3', scene);
 						const eyeRight4 = getBone('BoneEyeRight4', scene);
 						const eyeRight5 = getBone('BoneEyeRight5', scene);
+						
+						const earLeft = getBone('BoneEarLeft', scene);
+						const earRight = getBone('BoneEarRight', scene);
 
 						const mouth0StartPostion = { ...mouth0.position };
 						const mouth1StartPostion = { ...mouth1.position };
@@ -202,11 +212,16 @@
 						const eyeRight3StartPostion = { ...eyeRight3.position };
 						const eyeRight4StartPostion = { ...eyeRight4.position };
 						const eyeRight5StartPostion = { ...eyeRight5.position };
+						
+						const chinBoneStartPostion = { ...chinBone.position };
 
-						const chinOriginalY = chinBone.position.y + 0.45;
+						const earLeftStartRotation = { x: earLeft.rotation.x, y: earLeft.rotation.y, z: earLeft.rotation.z };
+						const earRightStartRotation = { x: earRight.rotation.x, y: earRight.rotation.y, z: earRight.rotation.z };
+
+						chinBoneStartPostion.y + 0.45;
 
 						// setInterval(() => {
-						// 	chinBone.position.set(chinBone.position.x, chinBone.position.y - 0.001, chinBone.position.z);
+						// 	earLeft.rotation.set(earLeft.rotation.x, earLeft.rotation.y + 0.001, earLeft.rotation.z);
 						// }, 16);
 
 						const leftEyeBlink = (p) => {
@@ -263,7 +278,7 @@
 							return tm;
 						}
 
-						const mainBlinkTimeline = new mojs.Timeline({ delay: 2000, repeat: 9999 });
+						const mainBlinkTimeline = new mojs.Timeline({ delay: `rand(1500, 2500)`, repeat: 9999 });
 						const blinkTimeline = new mojs.Timeline({ repeat: 1, delay: 'rand(0, 100)' });
 						blinkTimeline
 							.add(createBlink(true))
@@ -290,6 +305,16 @@
 						ipc.config.retry= 1500;
 						ipc.config.silent = true;
 
+						let currRotation = suzzaneModel.rotation.y;
+						let prevRotation = suzzaneModel.rotation.y;
+						let rotationValue = 0;
+
+						let bvx = 0;
+						let bax = 0;
+						let cr;
+
+						let _t = Date.now();
+
 						ipc.connectToNet(
 							'world',
 							function(){
@@ -314,6 +339,11 @@
 									function(faceData) {
 										const { transform, vertices } = faceData;
 										const { rotation, scale } = transform;
+										
+										prevRotation = currRotation;
+										currRotation = rotation.y;
+
+										// rotationValue = 0 - ((0 + rotationDelta) / 10);
 
 										// chin motion
 										const nosePoint = getVerticle(33, vertices);
@@ -322,9 +352,6 @@
 										suzzaneModel.rotation.set(rotation.x, -rotation.y, -rotation.z);
 										const scaleP = scale / 100;
 										suzzaneModel.scale.set(scaleP, scaleP, scaleP);
-
-										const deltaY = ((.75*(nosePoint.y - chinPoint.y) / 100) / scaleP);
-										chinBone.position.set(chinBone.position.x, (chinOriginalY + deltaY), chinBone.position.z);
 
 										const mouthLeft = getVerticle(48, vertices);
 										const mouthRight = getVerticle(54, vertices);
@@ -353,59 +380,40 @@
 											mainBlinkTimeline.play();
 										}
 
-										// console.log(verticalDelta);
+										const browLeft = getVerticle(24, vertices);
 
-										// const blink = vslsDetectBlink(vertices);
-										// console.log(`-=-=-=-=-=-=-=-=-`);
-										// switch(blink) {
-										// 	case 0: {
-										// 		console.log('left');
-										// 	}
-										// 	case 1: {
-										// 		console.log('right');
-										// 	}
-										// 	case 2: {
-										// 		console.log('both');
-										// 	}
-										// 	default: {
-										// 	}
-										// }
+										const rotationDelta = 3 * (prevRotation - currRotation);
 
-										// // eye left
-										// const eyeLeftTop = getVerticle(44, vertices);
-										// const eyeLeftBottom = getVerticle(46, vertices);
+										if (cr == null) {
+											cr = rotationDelta;
+										}
 
-										// const eyeLeftDeltaX = eyeLeftTop.x - eyeLeftBottom.x;
-										// const eyeLeftDeltaY = eyeLeftTop.y - eyeLeftBottom.y;
-										// const eyeLeftDelta = ((Math.sqrt((eyeLeftDeltaX * eyeLeftDeltaX) + (eyeLeftDeltaY * eyeLeftDeltaY)) - (5.6 * scaleP)) / 7) / scaleP;
+										/* Spring stiffness, in kg / s^2 */
+										var k = -20;
+										/* Damping constant, in kg / s */
+										var b = -0.75;
 
-										// const deL = Math.min(Math.max(-eyeLeftDelta, 0), 0.125*scaleP);
-										// eyeLeft0.position.set(eyeLeft0StartPostion.x, eyeLeft0StartPostion.y - .5*deL, eyeLeft0StartPostion.z);
-										// eyeLeft1.position.set(eyeLeft1StartPostion.x, eyeLeft1StartPostion.y + .5*deL, eyeLeft1StartPostion.z);
+										var now = Date.now();
+										var t = now - _t;
+										_t = now;
 
-										// eyeLeft5.position.set(eyeLeft5StartPostion.x, eyeLeft5StartPostion.y - .85*deL, eyeLeft5StartPostion.z);
-										// eyeLeft2.position.set(eyeLeft2StartPostion.x, eyeLeft2StartPostion.y + 1.1*deL, eyeLeft2StartPostion.z);
+										var spring_x = k * ( (cr - rotationDelta));
+										var damper_x = b * ( bvx );
+										// update acceleration
+										bax = ( spring_x + damper_x ) / 0.1;
+										// update velocity
+										bvx += bax * (t/1000);
+										// update position
+										cr += bvx * (t/1000);
+										cr = clamp(cr, -.5, .5);
 
-										// eyeLeft4.position.set(eyeLeft4StartPostion.x, eyeLeft4StartPostion.y - .4*deL, eyeLeft4StartPostion.z);
-										// eyeLeft3.position.set(eyeLeft3StartPostion.x, eyeLeft3StartPostion.y + .4*deL, eyeLeft3StartPostion.z);	
+										earLeft.rotation.set(earLeftStartRotation.x, earLeftStartRotation.y - cr, earLeftStartRotation.z);
+										earRight.rotation.set(earRightStartRotation.x, earRightStartRotation.y + cr, earRightStartRotation.z);
 
-										// // eye right
-										// const eyeRightTop = getVerticle(37, vertices);
-										// const eyeRightBottom = getVerticle(41, vertices);
+										const deltaY = ((.75*(nosePoint.y - chinPoint.y) / 600) / scaleP);
+										chinBone.position.set(chinBoneStartPostion.x - (cr / 10), (chinBoneStartPostion.y + deltaY), chinBoneStartPostion.z);
 
-										// const eyeRightDeltaX = eyeRightTop.x - eyeRightBottom.x;
-										// const eyeRightDeltaY = eyeRightTop.y - eyeRightBottom.y;
-										// const eyeRightDelta = ((Math.sqrt((eyeRightDeltaX * eyeRightDeltaX) + (eyeRightDeltaY * eyeRightDeltaY)) - (5.88 * scaleP)) / 7) / scaleP;
-
-										// const deR = Math.min(Math.max(-eyeRightDelta, 0), 0.125*scaleP);
-										// eyeRight0.position.set(eyeRight0StartPostion.x, eyeRight0StartPostion.y - .5*deR, eyeRight0StartPostion.z);
-										// eyeRight1.position.set(eyeRight1StartPostion.x, eyeRight1StartPostion.y + .5*deR, eyeRight1StartPostion.z);
-
-										// eyeRight5.position.set(eyeRight5StartPostion.x, eyeRight5StartPostion.y - .85*deR, eyeRight5StartPostion.z);
-										// eyeRight2.position.set(eyeRight2StartPostion.x, eyeRight2StartPostion.y + 1.1*deR, eyeRight2StartPostion.z);
-
-										// eyeRight4.position.set(eyeRight4StartPostion.x, eyeRight4StartPostion.y - .4*deR, eyeRight4StartPostion.z);
-										// eyeRight3.position.set(eyeRight3StartPostion.x, eyeRight3StartPostion.y + .4*deR, eyeRight3StartPostion.z);
+										console.log(`curr rotation: ${cr}`);
 									}
 								);
 							}
