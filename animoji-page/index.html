@@ -307,13 +307,32 @@
 
 						let currRotation = suzzaneModel.rotation.y;
 						let prevRotation = suzzaneModel.rotation.y;
-						let rotationValue = 0;
+
+						let currRotationX = suzzaneModel.rotation.x;
+						let prevRotationX = suzzaneModel.rotation.x;
+
+						let currRotationZ = suzzaneModel.rotation.z;
+						let prevRotationZ = suzzaneModel.rotation.z;
 
 						let bvx = 0;
 						let bax = 0;
 						let cr;
-
 						let _t = Date.now();
+
+						let bvx2 = 0;
+						let bax2 = 0;
+						let cr2;
+						let _t2 = Date.now();
+
+						let bvx3 = 0;
+						let bax3 = 0;
+						let cr3;
+						let _t3 = Date.now();
+
+						let bvx4 = 0;
+						let bax4 = 0;
+						let cr4;
+						let _t4 = Date.now();
 
 						ipc.connectToNet(
 							'world',
@@ -343,7 +362,11 @@
 										prevRotation = currRotation;
 										currRotation = rotation.y;
 
-										// rotationValue = 0 - ((0 + rotationDelta) / 10);
+										prevRotationX = currRotationX;
+										currRotationX = rotation.x;
+
+										prevRotationZ = currRotationZ;
+										currRotationZ = rotation.z;
 
 										// chin motion
 										const nosePoint = getVerticle(33, vertices);
@@ -381,15 +404,14 @@
 										}
 
 										const browLeft = getVerticle(24, vertices);
-
-										const rotationDelta = 3 * (prevRotation - currRotation);
+										const rotationDelta = clamp(1.5 * (prevRotation - currRotation), -0.5, 0.5);
 
 										if (cr == null) {
 											cr = rotationDelta;
 										}
 
 										/* Spring stiffness, in kg / s^2 */
-										var k = -20;
+										var k = -15;
 										/* Damping constant, in kg / s */
 										var b = -0.75;
 
@@ -405,15 +427,89 @@
 										bvx += bax * (t/1000);
 										// update position
 										cr += bvx * (t/1000);
-										cr = clamp(cr, -.5, .5);
+										cr = clamp(cr, -.75, .75);
 
 										earLeft.rotation.set(earLeftStartRotation.x, earLeftStartRotation.y - cr, earLeftStartRotation.z);
 										earRight.rotation.set(earRightStartRotation.x, earRightStartRotation.y + cr, earRightStartRotation.z);
 
-										const deltaY = ((.75*(nosePoint.y - chinPoint.y) / 600) / scaleP);
-										chinBone.position.set(chinBoneStartPostion.x - (cr / 10), (chinBoneStartPostion.y + deltaY), chinBoneStartPostion.z);
+										const rotationDelta2 = clamp(2.5 * (prevRotation - currRotation), -0.5, 0.5);
 
-										console.log(`curr rotation: ${cr}`);
+										if (cr2 == null) {
+											cr2 = rotationDelta2;
+										}
+
+										/* Spring stiffness, in kg / s^2 */
+										var k2 = -30;
+										/* Damping constant, in kg / s */
+										var b2 = -0.65;
+
+										var now2 = Date.now();
+										var t2 = now2 - _t2;
+										_t2 = now2;
+
+										var spring_x2 = k2 * ( (cr2 - rotationDelta2));
+										var damper_x2 = b2 * ( bvx2 );
+										// update acceleration
+										bax2 = ( spring_x2 + damper_x2 ) / 0.1;
+										// update velocity
+										bvx2 += bax2 * (t2/1000);
+										// update position
+										cr2 += bvx2 * (t2/1000);
+										cr2 = clamp(cr2, -.75, .75);
+
+										const rotationDelta3 = clamp(4 * (prevRotationX - currRotationX), -0.1, 0.1);
+
+										if (cr3 == null) {
+											cr3 = rotationDelta3;
+										}
+
+										/* Spring stiffness, in kg / s^2 */
+										var k3 = -15;
+										/* Damping constant, in kg / s */
+										var b3 = -0.75;
+
+										var now3 = Date.now();
+										var t3 = now3 - _t3;
+										_t3 = now3;
+
+										var spring_x3 = k3 * ( (cr3 - rotationDelta3));
+										var damper_x3 = b3 * ( bvx3 );
+										// update acceleration
+										bax3 = ( spring_x3 + damper_x3 ) / 0.1;
+										// update velocity
+										bvx3 += bax3 * (t3/1000);
+										// update position
+										cr3 += bvx3 * (t3/1000);
+										cr3 = clamp(cr3, -0.1, 0.1);
+
+										const rotationDelta4 = clamp(4 * (prevRotationZ - currRotationZ), -0.1, 0.1);
+
+										if (cr4 == null) {
+											cr4 = rotationDelta4;
+										}
+
+										/* Spring stiffness, in kg / s^2 */
+										var k4 = -10;
+										/* Damping constant, in kg / s */
+										var b4 = -0.75;
+
+										var now4 = Date.now();
+										var t4 = now4 - _t4;
+										_t4 = now4;
+
+										var spring_x4 = k4 * ( (cr4 - rotationDelta4));
+										var damper_x4 = b4 * ( bvx4 );
+										// update acceleration
+										bax4 = ( spring_x4 + damper_x4 ) / 0.1;
+										// update velocity
+										bvx4 += bax4 * (t4/1000);
+										// update position
+										cr4 += bvx4 * (t4/1000);
+										cr4 = clamp(cr4, -0.1, 0.1);
+
+										const deltaY = ((.75*(nosePoint.y - chinPoint.y) / 800) / scaleP);
+										// const c =  Math.max(cr3 / 10, cr4 / 10);
+										chinBone.position.set(chinBoneStartPostion.x - (cr2 / 10), (chinBoneStartPostion.y + deltaY) - cr3, chinBoneStartPostion.z - cr4);
 									}
 								);
 							}

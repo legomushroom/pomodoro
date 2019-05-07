@@ -10,7 +10,7 @@ It is a real time face detection and tracking SDK. You put in image data (camera
 
 Read the EULA (eula.txt) carefully before using the SDK. Once you decide to use BRFv4 commercially, you will get a 
 separate license agreement, that you must agree to. You can try the SDK free of charge to evaluate if it fits your projects' 
-needs. Once you decided to use BRFv4 in your project, please contact us for a commercial license:
+needs. Once you decided to **use** BRFv4 in your project, please contact us for a commercial license:
 
 + http://www.tastenkunst.com/#/contact
 
