@@ -112,10 +112,10 @@
 			g.drawCircle(x, y, radius);
 			g.endFill();
 
-			setTimeout(() => {
-				drawing.ctx.fillStyle = 'cyan';
-				drawing.ctx.fillText(i, x, y);
-			}, 1);
+			// setTimeout(() => {
+			// 	drawing.ctx.fillStyle = 'cyan';
+			// 	drawing.ctx.fillText(i, x, y);
+			// }, 1);
 		}
 	};
 
